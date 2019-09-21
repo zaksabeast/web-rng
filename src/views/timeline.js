@@ -65,6 +65,7 @@ const TimelineView = () => {
   return (
     <MainLayout
       title="Egg Timeline"
+      // TypeScript doesn't seem to like Element[] without a Fragment
       // @ts-ignore
       form={<EggTimelineForm onSubmit={setSettings} />}
       results={results}

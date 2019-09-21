@@ -48,6 +48,7 @@ const SafeFrameView = () => {
   return (
     <MainLayout
       title="Timeline Safe Frame"
+      // TypeScript doesn't seem to like Element[] without a Fragment
       // @ts-ignore
       form={<SafeFrameForm onSubmit={setSettings} />}
       results={results}

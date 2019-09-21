@@ -12,6 +12,7 @@ const useStyles = makeStyles(theme => ({
     margin: '10px auto',
     padding: 20,
     maxWidth: 700,
+    // Ignoring since the theme includes breakpoints
     // @ts-ignore
     [theme.breakpoints.up('sm')]: {
       padding: 50,

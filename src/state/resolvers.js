@@ -1,20 +1,17 @@
 import { wrap } from 'comlink';
 
-/**
- * @type {import('gen7rng').generateEggs}
- */
+/** @type {import('gen7rng').generateEggs} */
+// Overriding TypeScript's type
 // @ts-ignore
 const generateEggs = wrap(new Worker('../workers/generate-eggs.js'));
 
-/**
- * @type {import('gen7rng').getSafeFrames}
- */
+/** @type {import('gen7rng').getSafeFrames} */
+// Overriding TypeScript's type
 // @ts-ignore
 const getSafeFrames = wrap(new Worker('../workers/get-safe-frames.js'));
 
-/**
- * @type {import('gen7rng').createTimeline}
- */
+/** @type {import('gen7rng').createTimeline} */
+// Overriding TypeScript's type
 // @ts-ignore
 const createTimeline = wrap(new Worker('../workers/create-timeline.js'));
 

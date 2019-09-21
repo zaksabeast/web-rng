@@ -97,6 +97,8 @@ const HomeView = () => {
   return (
     <MainLayout
       title="Gen 7 Egg"
+      // TypeScript doesn't seem to like Element[] without a Fragment
+      // @ts-ignore
       form={<EggForm onSubmit={setSettings} />}
       results={results}
     />

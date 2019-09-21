@@ -19,14 +19,14 @@ const useStyles = makeStyles({
 });
 
 const formatRefsAsSettings = refs => {
-  const tsvs = _.get(refs.tsvs.current, 'value');
   return {
     initSeed: formatTextAsInt(refs.initSeed.current.value, 0, 16),
     startFrame: formatTextAsInt(refs.startFrame.current.value, 0, 10),
     npcCount: formatTextAsInt(refs.npcCount.current.value, 0, 10),
     timelineSeconds: formatTextAsInt(refs.timelineSeconds.current.value, 0, 10),
-    tsvs: _.map(formatTextAsArray(tsvs, COMMA_WITH_SPACE_REGEX, [0]), tsv =>
-      parseInt(tsv, 10),
+    tsvs: _.map(
+      formatTextAsArray(refs.tsvs.current.value, COMMA_WITH_SPACE_REGEX, [0]),
+      tsv => parseInt(tsv, 10),
     ),
   };
 };

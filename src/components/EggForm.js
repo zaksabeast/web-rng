@@ -28,19 +28,18 @@ const useStyles = makeStyles({
 });
 
 const formatRefsAsSettings = refs => {
-  const seeds = _.get(refs.seeds.current, 'value');
-  const femaleIVs = _.get(refs.femaleIVs.current, 'value');
-  const maleIVs = _.get(refs.maleIVs.current, 'value');
-  const otherTSVs = _.get(refs.otherTSV.current, 'value');
-  const frameAmount = _.get(refs.frameAmount.current, 'value');
-  const playerTSV = _.get(refs.playerTSV.current, 'value');
   return {
     eggSeeds: _.map(
-      formatTextAsArray(seeds, COMMA_WITH_SPACE_REGEX, [1, 1, 1, 1]).reverse(),
+      formatTextAsArray(refs.seeds.current.value, COMMA_WITH_SPACE_REGEX, [
+        1,
+        1,
+        1,
+        1,
+      ]).reverse(),
       eggSeed => parseInt(eggSeed, 16),
     ),
     femaleIVs: _.map(
-      formatTextAsArray(femaleIVs, SLASH_WITH_SPACE_REGEX, [
+      formatTextAsArray(refs.femaleIVs.current.value, SLASH_WITH_SPACE_REGEX, [
         31,
         31,
         31,
@@ -51,7 +50,7 @@ const formatRefsAsSettings = refs => {
       iv => parseInt(iv, 10),
     ),
     maleIVs: _.map(
-      formatTextAsArray(maleIVs, SLASH_WITH_SPACE_REGEX, [
+      formatTextAsArray(refs.maleIVs.current.value, SLASH_WITH_SPACE_REGEX, [
         31,
         31,
         31,
@@ -61,15 +60,17 @@ const formatRefsAsSettings = refs => {
       ]),
       iv => parseInt(iv, 10),
     ),
-    femaleAbility: _.get(refs.femaleAbility.current, 'value', '1'),
-    maleAbility: _.get(refs.maleAbility.current, 'value', '1'),
-    femaleItem: _.get(refs.femaleItem.current, 'value', 'None'),
-    maleItem: _.get(refs.maleItem.current, 'value', 'None'),
-    frameAmount: formatTextAsInt(frameAmount, 0, 10),
-    genderRatio: _.get(refs.genderRatio.current, 'value', 'Genderless'),
-    playerTSV: formatTextAsInt(playerTSV, 0, 10),
+    femaleAbility: refs.femaleAbility.current.value,
+    maleAbility: refs.maleAbility.current.value,
+    femaleItem: refs.femaleItem.current.value,
+    maleItem: refs.maleItem.current.value,
+    frameAmount: formatTextAsInt(refs.frameAmount.current.value, 0, 10),
+    genderRatio: refs.genderRatio.current.value,
+    playerTSV: formatTextAsInt(refs.playerTSV.current.value, 0, 10),
     otherTSV: _.map(
-      formatTextAsArray(otherTSVs, COMMA_WITH_SPACE_REGEX, [0]),
+      formatTextAsArray(refs.otherTSV.current.value, COMMA_WITH_SPACE_REGEX, [
+        0,
+      ]),
       tsv => parseInt(tsv, 10),
     ),
     masudaMethod: refs.masudaMethod.current.checked,
@@ -81,13 +82,10 @@ const formatRefsAsSettings = refs => {
 };
 
 const formatRefsAsFilters = refs => {
-  const upperIVs = _.get(refs.upperIVs.current, 'value');
-  const lowerIVs = _.get(refs.lowerIVs.current, 'value');
-  const perfectIVs = _.get(refs.perfectIVs.current, 'value');
   return {
-    gender: _.get(refs.gender.current, 'value', 'Genderless'),
+    gender: refs.gender.current.value,
     upperIVs: _.map(
-      formatTextAsArray(upperIVs, SLASH_WITH_SPACE_REGEX, [
+      formatTextAsArray(refs.upperIVs.current.value, SLASH_WITH_SPACE_REGEX, [
         31,
         31,
         31,
@@ -98,12 +96,19 @@ const formatRefsAsFilters = refs => {
       iv => parseInt(iv, 10),
     ),
     lowerIVs: _.map(
-      formatTextAsArray(lowerIVs, SLASH_WITH_SPACE_REGEX, [0, 0, 0, 0, 0, 0]),
+      formatTextAsArray(refs.lowerIVs.current.value, SLASH_WITH_SPACE_REGEX, [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ]),
       iv => parseInt(iv, 10),
     ),
-    perfectIVs: formatTextAsInt(perfectIVs, 0, 10),
-    shinies: _.get(refs.shinies.current, 'checked', false),
-    applyFilters: _.get(refs.applyFilters.current, 'checked', false),
+    perfectIVs: formatTextAsInt(refs.perfectIVs.current.value, 0, 10),
+    shinies: refs.shinies.current.checked,
+    applyFilters: refs.applyFilters.current.checked,
   };
 };
 

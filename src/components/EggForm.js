@@ -9,6 +9,11 @@ import GenderRatioDropdown from '../components/GenderRatioDropdown';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import GenderDropdown from '../components/GenderDropdown';
+import { formatTextAsArray } from '../utils/format-text-as-array';
+import {
+  COMMA_WITH_SPACE_REGEX,
+  SLASH_WITH_SPACE_REGEX,
+} from '../constants/regex';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -22,17 +27,35 @@ const useStyles = makeStyles({
 });
 
 const formatRefsAsSettings = refs => {
+  const seeds = _.get(refs.seeds.current, 'value');
+  const femaleIVs = _.get(refs.femaleIVs.current, 'value');
+  const maleIVs = _.get(refs.maleIVs.current, 'value');
+  const otherTSVs = _.get(refs.otherTSV.current, 'value');
   return {
     eggSeeds: _.map(
-      _.split(_.get(refs.seeds.current, 'value', '1, 1, 1, 1'), ', ').reverse(),
+      formatTextAsArray(seeds, COMMA_WITH_SPACE_REGEX, [1, 1, 1, 1]).reverse(),
       eggSeed => parseInt(eggSeed, 16),
     ),
     femaleIVs: _.map(
-      _.split(_.get(refs.femaleIVs.current, 'value', '31/31/31/31/31/31'), '/'),
+      formatTextAsArray(femaleIVs, SLASH_WITH_SPACE_REGEX, [
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+      ]),
       iv => parseInt(iv, 10),
     ),
     maleIVs: _.map(
-      _.split(_.get(refs.maleIVs.current, 'value', '31/31/31/31/31/31'), '/'),
+      formatTextAsArray(maleIVs, SLASH_WITH_SPACE_REGEX, [
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+      ]),
       iv => parseInt(iv, 10),
     ),
     femaleAbility: _.get(refs.femaleAbility.current, 'value', '1'),
@@ -43,7 +66,7 @@ const formatRefsAsSettings = refs => {
     genderRatio: _.get(refs.genderRatio.current, 'value', 'Genderless'),
     playerTSV: parseInt(_.get(refs.playerTSV.current, 'value', 0), 10),
     otherTSV: _.map(
-      _.split(_.get(refs.otherTSV.current, 'value', ''), '/'),
+      formatTextAsArray(otherTSVs, COMMA_WITH_SPACE_REGEX, [0]),
       tsv => parseInt(tsv, 10),
     ),
     masudaMethod: refs.masudaMethod.current.checked,
@@ -55,14 +78,23 @@ const formatRefsAsSettings = refs => {
 };
 
 const formatRefsAsFilters = refs => {
+  const upperIVs = _.get(refs.upperIVs.current, 'value');
+  const lowerIVs = _.get(refs.lowerIVs.current, 'value');
   return {
     gender: _.get(refs.gender.current, 'value', 'Genderless'),
     upperIVs: _.map(
-      _.split(_.get(refs.upperIVs.current, 'value', '31/31/31/31/31/31'), '/'),
+      formatTextAsArray(upperIVs, SLASH_WITH_SPACE_REGEX, [
+        31,
+        31,
+        31,
+        31,
+        31,
+        31,
+      ]),
       iv => parseInt(iv, 10),
     ),
     lowerIVs: _.map(
-      _.split(_.get(refs.lowerIVs.current, 'value', '0/0/0/0/0/0'), '/'),
+      formatTextAsArray(lowerIVs, SLASH_WITH_SPACE_REGEX, [0, 0, 0, 0, 0, 0]),
       iv => parseInt(iv, 10),
     ),
     perfectIVs: parseInt(_.get(refs.perfectIVs.current, 'value', '0'), 10),

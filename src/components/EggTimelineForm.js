@@ -3,6 +3,8 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '../components/TextField';
 import makeStyles from '@material-ui/styles/makeStyles';
+import { formatTextAsArray } from '../utils/format-text-as-array';
+import { COMMA_WITH_SPACE_REGEX } from '../constants/regex';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -16,15 +18,15 @@ const useStyles = makeStyles({
 });
 
 const formatRefsAsSettings = refs => {
-  const tsvs = _.get(refs.tsvs.current, 'value', '');
+  const tsvs = _.get(refs.tsvs.current, 'value');
   return {
     initSeed: parseInt(refs.initSeed.current.value, 16),
     startFrame: parseInt(refs.startFrame.current.value, 10),
     npcCount: parseInt(refs.npcCount.current.value, 10),
     timelineSeconds: parseInt(refs.timelineSeconds.current.value, 10),
-    tsvs: _.isEmpty(tsvs)
-      ? []
-      : _.map(_.split(tsvs, ', '), tsv => parseInt(tsv, 10)),
+    tsvs: _.map(formatTextAsArray(tsvs, COMMA_WITH_SPACE_REGEX, [0]), tsv =>
+      parseInt(tsv, 10),
+    ),
   };
 };
 

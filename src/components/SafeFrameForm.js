@@ -3,6 +3,7 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '../components/TextField';
 import makeStyles from '@material-ui/styles/makeStyles';
+import { formatTextAsInt } from '../utils/format-text-as-int';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -17,10 +18,10 @@ const useStyles = makeStyles({
 
 const formatRefsAsSettings = refs => {
   return {
-    initSeed: parseInt(refs.initSeed.current.value, 16),
-    startFrame: parseInt(refs.startFrame.current.value, 10),
-    endFrame: parseInt(refs.endFrame.current.value, 10),
-    npcCount: parseInt(refs.npcCount.current.value, 10),
+    initSeed: formatTextAsInt(refs.initSeed.current.value, 1, 16),
+    startFrame: formatTextAsInt(refs.startFrame.current.value, 0, 10),
+    endFrame: formatTextAsInt(refs.endFrame.current.value, 0, 10),
+    npcCount: formatTextAsInt(refs.npcCount.current.value, 0, 10),
   };
 };
 

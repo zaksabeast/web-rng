@@ -5,6 +5,7 @@ import TextField from '../components/TextField';
 import makeStyles from '@material-ui/styles/makeStyles';
 import { formatTextAsArray } from '../utils/format-text-as-array';
 import { COMMA_WITH_SPACE_REGEX } from '../constants/regex';
+import { formatTextAsInt } from '../utils/format-text-as-int';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -20,10 +21,10 @@ const useStyles = makeStyles({
 const formatRefsAsSettings = refs => {
   const tsvs = _.get(refs.tsvs.current, 'value');
   return {
-    initSeed: parseInt(refs.initSeed.current.value, 16),
-    startFrame: parseInt(refs.startFrame.current.value, 10),
-    npcCount: parseInt(refs.npcCount.current.value, 10),
-    timelineSeconds: parseInt(refs.timelineSeconds.current.value, 10),
+    initSeed: formatTextAsInt(refs.initSeed.current.value, 0, 16),
+    startFrame: formatTextAsInt(refs.startFrame.current.value, 0, 10),
+    npcCount: formatTextAsInt(refs.npcCount.current.value, 0, 10),
+    timelineSeconds: formatTextAsInt(refs.timelineSeconds.current.value, 0, 10),
     tsvs: _.map(formatTextAsArray(tsvs, COMMA_WITH_SPACE_REGEX, [0]), tsv =>
       parseInt(tsv, 10),
     ),

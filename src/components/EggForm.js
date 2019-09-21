@@ -14,6 +14,7 @@ import {
   COMMA_WITH_SPACE_REGEX,
   SLASH_WITH_SPACE_REGEX,
 } from '../constants/regex';
+import { formatTextAsInt } from '../utils/format-text-as-int';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -31,6 +32,8 @@ const formatRefsAsSettings = refs => {
   const femaleIVs = _.get(refs.femaleIVs.current, 'value');
   const maleIVs = _.get(refs.maleIVs.current, 'value');
   const otherTSVs = _.get(refs.otherTSV.current, 'value');
+  const frameAmount = _.get(refs.frameAmount.current, 'value');
+  const playerTSV = _.get(refs.playerTSV.current, 'value');
   return {
     eggSeeds: _.map(
       formatTextAsArray(seeds, COMMA_WITH_SPACE_REGEX, [1, 1, 1, 1]).reverse(),
@@ -62,9 +65,9 @@ const formatRefsAsSettings = refs => {
     maleAbility: _.get(refs.maleAbility.current, 'value', '1'),
     femaleItem: _.get(refs.femaleItem.current, 'value', 'None'),
     maleItem: _.get(refs.maleItem.current, 'value', 'None'),
-    frameAmount: parseInt(_.get(refs.frameAmount.current, 'value', 10), 10),
+    frameAmount: formatTextAsInt(frameAmount, 0, 10),
     genderRatio: _.get(refs.genderRatio.current, 'value', 'Genderless'),
-    playerTSV: parseInt(_.get(refs.playerTSV.current, 'value', 0), 10),
+    playerTSV: formatTextAsInt(playerTSV, 0, 10),
     otherTSV: _.map(
       formatTextAsArray(otherTSVs, COMMA_WITH_SPACE_REGEX, [0]),
       tsv => parseInt(tsv, 10),
@@ -80,6 +83,7 @@ const formatRefsAsSettings = refs => {
 const formatRefsAsFilters = refs => {
   const upperIVs = _.get(refs.upperIVs.current, 'value');
   const lowerIVs = _.get(refs.lowerIVs.current, 'value');
+  const perfectIVs = _.get(refs.perfectIVs.current, 'value');
   return {
     gender: _.get(refs.gender.current, 'value', 'Genderless'),
     upperIVs: _.map(
@@ -97,7 +101,7 @@ const formatRefsAsFilters = refs => {
       formatTextAsArray(lowerIVs, SLASH_WITH_SPACE_REGEX, [0, 0, 0, 0, 0, 0]),
       iv => parseInt(iv, 10),
     ),
-    perfectIVs: parseInt(_.get(refs.perfectIVs.current, 'value', '0'), 10),
+    perfectIVs: formatTextAsInt(perfectIVs, 0, 10),
     shinies: _.get(refs.shinies.current, 'checked', false),
     applyFilters: _.get(refs.applyFilters.current, 'checked', false),
   };

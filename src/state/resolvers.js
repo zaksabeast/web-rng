@@ -23,7 +23,10 @@ const resolvers = {
         return [];
       }
 
-      return generateEggs(args.settings, args.frameAmount);
+      return generateEggs(
+        { ...args.settings, eggSeeds: args.settings.eggSeeds.reverse() },
+        args.frameAmount,
+      );
     },
     getSafeFrames: (parent, args) => {
       if (args.minFrame >= args.maxFrame) {

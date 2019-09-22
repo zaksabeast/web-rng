@@ -83,7 +83,7 @@ const initialState = {
   eggSettings,
   eggFilters,
   isDrawerOpen: false,
-  currentView: 'timeline',
+  currentView: 'home',
 };
 
 const cache = new InMemoryCache();

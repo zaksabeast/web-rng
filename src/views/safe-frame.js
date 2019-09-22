@@ -7,6 +7,15 @@ import Typography from '@material-ui/core/Typography';
 import SafeFrameForm from '../components/SafeFrameForm';
 import SafeFrameResults from '../components/SafeFrameResults';
 
+const GET_SAFE_FRAME_SETTINGS = gql`
+  query {
+    initSeed @client
+    startFrame @client
+    endFrame @client
+    npcCount @client
+  }
+`;
+
 const GET_SAFE_FRAMES = gql`
   query($initSeed: Int!, $startFrame: Int!, $endFrame: Int!, $npcCount: Int!) {
     safeFrames: getSafeFrames(
@@ -24,25 +33,23 @@ const useStyles = makeStyles({
   },
 });
 
-const defaultSettings = {
-  initSeed: 0xaabbccdd,
-  startFrame: 0,
-  endFrame: 0,
-  npcCount: 4,
-};
-
 const SafeFrameView = () => {
   const classes = useStyles({});
-  const [settings, setSettings] = React.useState(defaultSettings);
-  const { loading, data } = useQuery(GET_SAFE_FRAMES, {
-    variables: settings,
+  const { data: safeFrameSettingsResults } = useQuery(GET_SAFE_FRAME_SETTINGS);
+  const { loading, data: safeFrameResults } = useQuery(GET_SAFE_FRAMES, {
+    variables: {
+      initSeed: safeFrameSettingsResults.initSeed,
+      startFrame: safeFrameSettingsResults.startFrame,
+      endFrame: safeFrameSettingsResults.endFrame,
+      npcCount: safeFrameSettingsResults.npcCount,
+    },
   });
   const results = loading ? (
     <Typography variant="h5" className={classes.loadingText}>
       Loading...
     </Typography>
   ) : (
-    <SafeFrameResults safeFrameResults={data.safeFrames} />
+    <SafeFrameResults safeFrameResults={safeFrameResults.safeFrames} />
   );
 
   return (
@@ -50,7 +57,7 @@ const SafeFrameView = () => {
       title="Timeline Safe Frame"
       // TypeScript doesn't seem to like Element[] without a Fragment
       // @ts-ignore
-      form={<SafeFrameForm onSubmit={setSettings} />}
+      form={<SafeFrameForm />}
       results={results}
     />
   );

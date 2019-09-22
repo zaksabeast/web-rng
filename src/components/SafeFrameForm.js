@@ -3,7 +3,11 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '../components/TextField';
 import makeStyles from '@material-ui/styles/makeStyles';
+import gql from 'graphql-tag';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import { formatTextAsInt } from '../utils/format-text-as-int';
+import { defaultSafeFrameSettings } from '../state/client';
+import { useForm } from '../utils/use-form';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -16,44 +20,101 @@ const useStyles = makeStyles({
   },
 });
 
-const formatRefsAsSettings = refs => {
+const GET_SAFE_FRAME_SETTINGS = gql`
+  query {
+    initSeed @client
+    startFrame @client
+    endFrame @client
+    npcCount @client
+  }
+`;
+
+const SET_SAFE_FRAME_SETTINGS = gql`
+  mutation(
+    $initSeed: String!
+    $startFrame: Int!
+    $endFrame: Int!
+    $npcCount: Int!
+  ) {
+    setSafeFrameSettings(
+      initSeed: $initSeed
+      startFrame: $startFrame
+      endFrame: $endFrame
+      npcCount: $npcCount
+    ) @client
+  }
+`;
+
+const parseSettings = settings => {
   return {
-    initSeed: formatTextAsInt(refs.initSeed.current.value, 1, 16),
-    startFrame: formatTextAsInt(refs.startFrame.current.value, 0, 10),
-    endFrame: formatTextAsInt(refs.endFrame.current.value, 0, 10),
-    npcCount: formatTextAsInt(refs.npcCount.current.value, 0, 10),
+    initSeed: formatTextAsInt(
+      settings.initSeed,
+      parseInt(defaultSafeFrameSettings.initSeed, 16),
+      16,
+    ),
+    startFrame: formatTextAsInt(
+      settings.startFrame,
+      defaultSafeFrameSettings.startFrame,
+      10,
+    ),
+    endFrame: formatTextAsInt(
+      settings.endFrame,
+      defaultSafeFrameSettings.endFrame,
+      10,
+    ),
+    npcCount: formatTextAsInt(
+      settings.npcCount,
+      defaultSafeFrameSettings.npcCount,
+      10,
+    ),
   };
 };
 
-const SafeFrameForm = ({ onSubmit = _.noop }) => {
+const SafeFrameForm = () => {
   const classes = useStyles({});
-  const refs = {
-    initSeed: React.useRef(null),
-    startFrame: React.useRef(null),
-    endFrame: React.useRef(null),
-    npcCount: React.useRef(null),
-  };
+  const { getRefs, getValues } = useForm(
+    defaultSafeFrameSettings,
+    parseSettings,
+  );
+  const refs = getRefs();
+  const { loading, data } = useQuery(GET_SAFE_FRAME_SETTINGS);
+  const [setSafeFrameSettings] = useMutation(SET_SAFE_FRAME_SETTINGS);
+
+  if (loading) {
+    return null;
+  }
 
   // These inputs will be mapped over later with a key added
   /* eslint-disable react/jsx-key */
   const inputs = [
     <TextField
-      inputRef={refs.initSeed}
       label="Initial Seed"
-      placeholder="AABBCCDD"
+      placeholder={data.initSeed.toString(16).toUpperCase()}
+      inputRef={refs.initSeed}
     />,
     <TextField
-      inputRef={refs.startFrame}
       label="Start Frame"
-      placeholder="900"
+      type="number"
+      placeholder={data.startFrame.toString(10)}
+      inputRef={refs.startFrame}
     />,
-    <TextField inputRef={refs.endFrame} label="End Frame" placeholder="1200" />,
-    <TextField inputRef={refs.npcCount} label="NPC Count" placeholder="4" />,
+    <TextField
+      label="End Frame"
+      type="number"
+      placeholder={data.endFrame.toString(10)}
+      inputRef={refs.endFrame}
+    />,
+    <TextField
+      label="NPC Count"
+      type="number"
+      placeholder={data.npcCount.toString(10)}
+      inputRef={refs.npcCount}
+    />,
     <Button
       variant="contained"
       color="primary"
       className={classes.fullWidth}
-      onClick={() => onSubmit(formatRefsAsSettings(refs))}
+      onClick={() => setSafeFrameSettings({ variables: getValues() })}
     >
       Find Safe Frames
     </Button>,

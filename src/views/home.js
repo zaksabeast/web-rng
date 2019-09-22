@@ -8,6 +8,39 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import EggForm from '../components/EggForm';
 
+const GET_EGG_SETTINGS = gql`
+  query {
+    eggSettings @client {
+      __typename
+      eggSeeds
+      femaleIVs
+      maleIVs
+      otherTSV
+      masudaMethod
+      isFemaleDitto
+      nidoType
+      sameDexNumber
+      shinyCharm
+      playerTSV
+      femaleAbility
+      femaleItem
+      genderRatio
+      maleAbility
+      maleItem
+      frameAmount
+    }
+    eggFilters @client {
+      __typename
+      gender
+      upperIVs
+      lowerIVs
+      perfectIVs
+      shinies
+      applyFilters
+    }
+  }
+`;
+
 const GET_EGGS = gql`
   query($settings: Gen7EggSettings, $frameAmount: Int!) {
     eggs: getGen7Eggs(settings: $settings, frameAmount: $frameAmount) @client
@@ -19,35 +52,6 @@ const useStyles = makeStyles({
     margin: 40,
   },
 });
-
-const defaultSettings = {
-  settings: {
-    eggSeeds: [1, 2, 3, 4],
-    femaleIVs: [31, 31, 31, 31, 31, 31],
-    maleIVs: [1, 2, 3, 4, 5, 6],
-    otherTSV: [],
-    masudaMethod: true,
-    isFemaleDitto: true,
-    nidoType: false,
-    sameDexNumber: false,
-    shinyCharm: true,
-    playerTSV: 1234,
-    femaleAbility: 'H',
-    femaleItem: 'Destiny Knot',
-    genderRatio: '1:1',
-    maleAbility: 'H',
-    maleItem: 'Everstone',
-    frameAmount: 0,
-  },
-  filters: {
-    gender: 'No Gender',
-    upperIVs: [31, 31, 31, 31, 31, 31],
-    lowerIVs: [0, 0, 0, 0, 0, 0],
-    perfectIVs: 0,
-    shinies: false,
-    applyFilters: false,
-  },
-};
 
 const checkIfIVsAreInRange = (upperIVs, lowerIVs, ivs) => {
   return _.every(
@@ -75,17 +79,18 @@ const filterResults = (filters, eggs) => {
 
 const HomeView = () => {
   const classes = useStyles({});
-  const [{ filters, settings }, setSettings] = React.useState(defaultSettings);
-  const { frameAmount } = settings;
-  const { loading, data } = useQuery(GET_EGGS, {
+  const { data: eggSettingResults } = useQuery(GET_EGG_SETTINGS);
+  const { eggFilters, eggSettings } = eggSettingResults;
+  const { frameAmount, ...settings } = eggSettings;
+  const { loading, data: eggResults } = useQuery(GET_EGGS, {
     variables: {
       settings,
       frameAmount,
     },
   });
-  const eggs = filters.applyFilters
-    ? filterResults(filters, data.eggs)
-    : _.get(data, 'eggs', []);
+  const eggs = eggFilters.applyFilters
+    ? filterResults(eggFilters, eggResults.eggs)
+    : _.get(eggResults, 'eggs', []);
   const results = loading ? (
     <Typography variant="h5" className={classes.loadingText}>
       Loading...
@@ -99,7 +104,7 @@ const HomeView = () => {
       title="Gen 7 Egg"
       // TypeScript doesn't seem to like Element[] without a Fragment
       // @ts-ignore
-      form={<EggForm onSubmit={setSettings} />}
+      form={<EggForm />}
       results={results}
     />
   );

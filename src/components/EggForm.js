@@ -10,11 +10,13 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import GenderDropdown from '../components/GenderDropdown';
 import { formatTextAsArray } from '../utils/format-text-as-array';
-import {
-  COMMA_WITH_SPACE_REGEX,
-  SLASH_WITH_SPACE_REGEX,
-} from '../constants/regex';
+import { COMMA_WITH_SPACE_REGEX } from '../constants/regex';
 import { formatTextAsInt } from '../utils/format-text-as-int';
+import gql from 'graphql-tag';
+import { useQuery, useMutation } from '@apollo/react-hooks';
+import { defaultEggSettingsForm } from '../state/client';
+import { useForm } from '../utils/use-form';
+import { formatIVs } from '../utils/format-ivs';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -27,244 +29,240 @@ const useStyles = makeStyles({
   },
 });
 
-const formatRefsAsSettings = refs => {
-  return {
-    eggSeeds: _.map(
-      formatTextAsArray(refs.seeds.current.value, COMMA_WITH_SPACE_REGEX, [
-        1,
-        1,
-        1,
-        1,
-      ]).reverse(),
-      eggSeed => parseInt(eggSeed, 16),
-    ),
-    femaleIVs: _.map(
-      formatTextAsArray(refs.femaleIVs.current.value, SLASH_WITH_SPACE_REGEX, [
-        31,
-        31,
-        31,
-        31,
-        31,
-        31,
-      ]),
-      iv => parseInt(iv, 10),
-    ),
-    maleIVs: _.map(
-      formatTextAsArray(refs.maleIVs.current.value, SLASH_WITH_SPACE_REGEX, [
-        31,
-        31,
-        31,
-        31,
-        31,
-        31,
-      ]),
-      iv => parseInt(iv, 10),
-    ),
-    femaleAbility: refs.femaleAbility.current.value,
-    maleAbility: refs.maleAbility.current.value,
-    femaleItem: refs.femaleItem.current.value,
-    maleItem: refs.maleItem.current.value,
-    frameAmount: formatTextAsInt(refs.frameAmount.current.value, 0, 10),
-    genderRatio: refs.genderRatio.current.value,
-    playerTSV: formatTextAsInt(refs.playerTSV.current.value, 0, 10),
-    otherTSV: _.map(
-      formatTextAsArray(refs.otherTSV.current.value, COMMA_WITH_SPACE_REGEX, [
-        0,
-      ]),
-      tsv => parseInt(tsv, 10),
-    ),
-    masudaMethod: refs.masudaMethod.current.checked,
-    shinyCharm: refs.shinyCharm.current.checked,
-    isFemaleDitto: refs.isFemaleDitto.current.checked,
-    nidoType: refs.nidoType.current.checked,
-    sameDexNumber: refs.sameDexNumber.current.checked,
-  };
-};
+const GET_EGG_SETTINGS = gql`
+  query {
+    eggSettings @client {
+      __typename
+      eggSeeds
+      femaleIVs
+      maleIVs
+      otherTSV
+      masudaMethod
+      isFemaleDitto
+      nidoType
+      sameDexNumber
+      shinyCharm
+      playerTSV
+      femaleAbility
+      femaleItem
+      genderRatio
+      maleAbility
+      maleItem
+      frameAmount
+    }
+    eggFilters @client {
+      __typename
+      gender
+      upperIVs
+      lowerIVs
+      perfectIVs
+      shinies
+      applyFilters
+    }
+  }
+`;
 
-const formatRefsAsFilters = refs => {
-  return {
-    gender: refs.gender.current.value,
-    upperIVs: _.map(
-      formatTextAsArray(refs.upperIVs.current.value, SLASH_WITH_SPACE_REGEX, [
-        31,
-        31,
-        31,
-        31,
-        31,
-        31,
-      ]),
-      iv => parseInt(iv, 10),
-    ),
-    lowerIVs: _.map(
-      formatTextAsArray(refs.lowerIVs.current.value, SLASH_WITH_SPACE_REGEX, [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-      ]),
-      iv => parseInt(iv, 10),
-    ),
-    perfectIVs: formatTextAsInt(refs.perfectIVs.current.value, 0, 10),
-    shinies: refs.shinies.current.checked,
-    applyFilters: refs.applyFilters.current.checked,
-  };
-};
+const SET_EGG_SETTINGS = gql`
+  mutation($eggSettings: Gen7EggSettingsInput!, $eggFilters: EggFiltersInput!) {
+    setEggSettings(eggSettings: $eggSettings, eggFilters: $eggFilters) @client
+  }
+`;
 
-const EggForm = ({ onSubmit = _.noop }) => {
-  const classes = useStyles({});
-  const refs = {
-    seeds: React.useRef(null),
-    femaleAbility: React.useRef(null),
-    maleAbility: React.useRef(null),
-    femaleItem: React.useRef(null),
-    maleItem: React.useRef(null),
-    femaleIVs: React.useRef(null),
-    maleIVs: React.useRef(null),
-    frameAmount: React.useRef(null),
-    genderRatio: React.useRef(null),
-    playerTSV: React.useRef(null),
-    otherTSV: React.useRef(null),
-    masudaMethod: React.useRef(null),
-    shinyCharm: React.useRef(null),
-    isFemaleDitto: React.useRef(null),
-    nidoType: React.useRef(null),
-    sameDexNumber: React.useRef(null),
-    filters: {
-      gender: React.useRef(null),
-      upperIVs: React.useRef(null),
-      lowerIVs: React.useRef(null),
-      perfectIVs: React.useRef(null),
-      shinies: React.useRef(null),
-      applyFilters: React.useRef(null),
+const parseSettings = settings => {
+  return {
+    eggSettings: {
+      __typename: 'Gen7EggSettings',
+      eggSeeds: formatTextAsArray(
+        settings.eggSettings.eggSeeds,
+        COMMA_WITH_SPACE_REGEX,
+        [0xaabbccdd, 0xaabbccdd, 0xaabbccdd, 0xaabbccdd],
+        num => parseInt(num, 16),
+      ),
+      femaleIVs: formatIVs(settings.eggSettings.femaleIVs),
+      maleIVs: formatIVs(settings.eggSettings.maleIVs),
+      otherTSV: formatTextAsArray(
+        settings.eggSettings.otherTSV,
+        COMMA_WITH_SPACE_REGEX,
+        [],
+        num => parseInt(num, 10),
+      ),
+      masudaMethod: settings.eggSettings.masudaMethod,
+      isFemaleDitto: settings.eggSettings.isFemaleDitto,
+      nidoType: settings.eggSettings.nidoType,
+      sameDexNumber: settings.eggSettings.sameDexNumber,
+      shinyCharm: settings.eggSettings.shinyCharm,
+      playerTSV: formatTextAsInt(
+        settings.eggSettings.playerTSV,
+        defaultEggSettingsForm.eggSettings.playerTSV,
+        10,
+      ),
+      femaleAbility: settings.eggSettings.femaleAbility,
+      femaleItem: settings.eggSettings.femaleItem,
+      genderRatio: settings.eggSettings.genderRatio,
+      maleAbility: settings.eggSettings.maleAbility,
+      maleItem: settings.eggSettings.maleItem,
+      frameAmount: formatTextAsInt(
+        settings.eggSettings.frameAmount,
+        defaultEggSettingsForm.eggSettings.frameAmount,
+        10,
+      ),
+    },
+    eggFilters: {
+      __typename: 'EggFilters',
+      gender: settings.eggFilters.gender,
+      upperIVs: formatIVs(settings.eggFilters.upperIVs),
+      lowerIVs: formatIVs(settings.eggFilters.lowerIVs),
+      perfectIVs: formatTextAsInt(
+        settings.eggFilters.frameAmount,
+        defaultEggSettingsForm.eggFilters.perfectIVs,
+        10,
+      ),
+      shinies: settings.eggFilters.shinies,
+      applyFilters: settings.eggFilters.applyFilters,
     },
   };
+};
+
+const EggForm = () => {
+  const classes = useStyles({});
+  const { getRefs, getValues } = useForm(defaultEggSettingsForm, parseSettings);
+  const refs = getRefs();
+  const { loading, data } = useQuery(GET_EGG_SETTINGS);
+  const [setEggSettings] = useMutation(SET_EGG_SETTINGS);
+
+  if (loading) {
+    return null;
+  }
 
   // These inputs will be mapped over later with a key added
   /* eslint-disable react/jsx-key */
   const inputs = [
     <TextField
-      inputRef={refs.seeds}
       label="Egg Seeds"
-      placeholder="AABBCCDD, AABBCCDD, AABBCCDD, AABBCCDD"
+      placeholder={data.eggSettings.eggSeeds
+        .map(seed => seed.toString(16))
+        .join(', ')
+        .toUpperCase()}
+      inputRef={refs.eggSettings.eggSeeds}
     />,
     <AbilityDropdown
-      inputRef={refs.femaleAbility}
       className={classes.fullWidth}
       label="Female Ability"
+      inputRef={refs.eggSettings.femaleAbility}
     />,
     <AbilityDropdown
-      inputRef={refs.maleAbility}
       className={classes.fullWidth}
       label="Male Ability"
+      inputRef={refs.eggSettings.maleAbility}
     />,
     <ItemDropdown
-      inputRef={refs.femaleItem}
       className={classes.fullWidth}
       label="Female Item"
+      inputRef={refs.eggSettings.femaleItem}
     />,
     <ItemDropdown
-      inputRef={refs.maleItem}
       className={classes.fullWidth}
       label="Male Item"
+      inputRef={refs.eggSettings.maleItem}
     />,
     <TextField
-      inputRef={refs.femaleIVs}
       label="Female IVs"
       fullWidth
-      placeholder="31/31/31/31/31/31"
+      placeholder={data.eggSettings.femaleIVs.join('/')}
+      inputRef={refs.eggSettings.femaleIVs}
     />,
     <TextField
-      inputRef={refs.maleIVs}
       label="Male IVs"
       fullWidth
-      placeholder="31/31/31/31/31/31"
+      placeholder={data.eggSettings.maleIVs.join('/')}
+      inputRef={refs.eggSettings.maleIVs}
     />,
     <TextField
-      inputRef={refs.frameAmount}
       label="Frame Amount"
       fullWidth
-      placeholder="0"
+      placeholder={data.eggSettings.frameAmount.toString(10)}
+      inputRef={refs.eggSettings.frameAmount}
     />,
     <GenderRatioDropdown
-      inputRef={refs.genderRatio}
       className={classes.fullWidth}
       label="Gender Ratio"
+      inputRef={refs.eggSettings.genderRatio}
     />,
     <TextField
-      inputRef={refs.playerTSV}
       label="Your TSV"
       fullWidth
-      placeholder="1234"
+      placeholder={data.eggSettings.playerTSV.toString(10)}
+      inputRef={refs.eggSettings.playerTSV}
     />,
     <TextField
-      inputRef={refs.otherTSV}
       label="Other TSVs"
       fullWidth
-      placeholder="123, 4321, 5678"
+      placeholder={data.eggSettings.otherTSV.join(', ')}
+      inputRef={refs.eggSettings.otherTSV}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.masudaMethod} />}
+      control={<Checkbox />}
       label="Masuda Method"
+      inputRef={refs.eggSettings.masudaMethod}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.shinyCharm} />}
+      control={<Checkbox />}
       label="Shiny Charm"
+      inputRef={refs.eggSettings.shinyCharm}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.nidoType} />}
+      control={<Checkbox />}
       label="Parents are Nidoran"
+      inputRef={refs.eggSettings.nidoType}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.sameDexNumber} />}
+      control={<Checkbox />}
       label="Parents are the same species"
+      inputRef={refs.eggSettings.sameDexNumber}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.isFemaleDitto} />}
+      control={<Checkbox />}
       label="The female is Ditto"
+      inputRef={refs.eggSettings.isFemaleDitto}
     />,
     <GenderDropdown
-      inputRef={refs.filters.gender}
       className={classes.fullWidth}
       label="Gender Filter"
+      inputRef={refs.eggFilters.gender}
     />,
     <TextField
-      inputRef={refs.filters.upperIVs}
       label="Upper IV Filter"
       fullWidth
-      placeholder="31/31/31/31/31/31"
+      placeholder={data.eggFilters.upperIVs.join('/')}
+      inputRef={refs.eggFilters.upperIVs}
     />,
     <TextField
-      inputRef={refs.filters.lowerIVs}
       label="Lower IV Filter"
       fullWidth
-      placeholder="0/0/0/0/0/0"
+      placeholder={data.eggFilters.lowerIVs.join('/')}
+      inputRef={refs.eggFilters.lowerIVs}
     />,
     <TextField
-      inputRef={refs.filters.perfectIVs}
       label="Perfect IVs"
       fullWidth
-      placeholder="0"
+      placeholder={data.eggFilters.perfectIVs.toString(10)}
+      inputRef={refs.eggFilters.perfectIVs}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.filters.shinies} />}
+      control={<Checkbox />}
       label="Filter Shinies"
+      inputRef={refs.eggFilters.shinies}
     />,
     <FormControlLabel
-      control={<Checkbox inputRef={refs.filters.applyFilters} />}
+      control={<Checkbox />}
       label="Apply Filters"
+      inputRef={refs.eggFilters.applyFilters}
     />,
     <Button
       variant="contained"
       color="primary"
       className={classes.fullWidth}
-      onClick={() =>
-        onSubmit({
-          settings: formatRefsAsSettings(refs),
-          filters: formatRefsAsFilters(refs.filters),
-        })
-      }
+      onClick={() => setEggSettings({ variables: getValues() })}
     >
       Generate
     </Button>,

@@ -9,6 +9,16 @@ import EggTimelineForm from '../components/EggTimelineForm';
 import EggTimelineResults from '../components/EggTimelineResults';
 import { calculatePSV } from '../utils/calculate-psv';
 
+const GET_EGG_TIMELINE_SETTINGS = gql`
+  query {
+    initSeed @client
+    startFrame @client
+    npcCount @client
+    tsvs @client
+    timelineSeconds @client
+  }
+`;
+
 const GET_TIMELINE = gql`
   query(
     $initSeed: Int!
@@ -33,26 +43,21 @@ const useStyles = makeStyles({
   },
 });
 
-const defaultSettings = {
-  initSeed: 0xaabbccdd,
-  startFrame: 900,
-  npcCount: 4,
-  timelineSeconds: 0,
-  tsvs: [],
-};
-
 const TimelineView = () => {
   const classes = useStyles({});
-  const [settings, setSettings] = React.useState(defaultSettings);
-  const { loading, data } = useQuery(GET_TIMELINE, {
-    variables: { ...settings, delayFrames: 38 },
+  const { data: eggTimelineSettingsResults } = useQuery(
+    GET_EGG_TIMELINE_SETTINGS,
+  );
+  const { tsvs, ...timelineSettings } = eggTimelineSettingsResults;
+  const { loading, data: timelineResults } = useQuery(GET_TIMELINE, {
+    variables: { ...timelineSettings, delayFrames: 38 },
   });
-  const fetchedTimeline = _.get(data, 'timeline');
-  const timeline = _.isEmpty(settings.tsvs)
+  const fetchedTimeline = _.get(timelineResults, 'timeline');
+  const timeline = _.isEmpty(tsvs)
     ? fetchedTimeline
     : _.filter(fetchedTimeline, frame => {
         const psv = calculatePSV(frame.rand);
-        return _.includes(settings.tsvs, psv);
+        return _.includes(tsvs, psv);
       });
   const results = loading ? (
     <Typography variant="h5" className={classes.loadingText}>
@@ -67,7 +72,7 @@ const TimelineView = () => {
       title="Egg Timeline"
       // TypeScript doesn't seem to like Element[] without a Fragment
       // @ts-ignore
-      form={<EggTimelineForm onSubmit={setSettings} />}
+      form={<EggTimelineForm />}
       results={results}
     />
   );

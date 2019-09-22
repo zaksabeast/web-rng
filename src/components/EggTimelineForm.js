@@ -6,6 +6,10 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { formatTextAsArray } from '../utils/format-text-as-array';
 import { COMMA_WITH_SPACE_REGEX } from '../constants/regex';
 import { formatTextAsInt } from '../utils/format-text-as-int';
+import { useMutation, useQuery } from '@apollo/react-hooks';
+import gql from 'graphql-tag';
+import { useForm } from '../utils/use-form';
+import { defaultEggTimelineSettings } from '../state/client';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -18,58 +22,112 @@ const useStyles = makeStyles({
   },
 });
 
-const formatRefsAsSettings = refs => {
+const GET_EGG_TIMELINE_SETTINGS = gql`
+  query {
+    initSeed @client
+    startFrame @client
+    npcCount @client
+    tsvs @client
+    timelineSeconds @client
+  }
+`;
+
+const SET_EGG_TIMELINE_SETTINGS = gql`
+  mutation(
+    $initSeed: Int!
+    $startFrame: Int!
+    $npcCount: Int!
+    $tsvs: [Int!]!
+    $timelineSeconds: Int!
+  ) {
+    setSafeFrameSettings(
+      initSeed: $initSeed
+      startFrame: $startFrame
+      npcCount: $npcCount
+      tsvs: $tsvs
+      timelineSeconds: $timelineSeconds
+    ) @client
+  }
+`;
+
+const parseSettings = settings => {
   return {
-    initSeed: formatTextAsInt(refs.initSeed.current.value, 0, 16),
-    startFrame: formatTextAsInt(refs.startFrame.current.value, 0, 10),
-    npcCount: formatTextAsInt(refs.npcCount.current.value, 0, 10),
-    timelineSeconds: formatTextAsInt(refs.timelineSeconds.current.value, 0, 10),
-    tsvs: _.map(
-      formatTextAsArray(refs.tsvs.current.value, COMMA_WITH_SPACE_REGEX, [0]),
-      tsv => parseInt(tsv, 10),
+    initSeed: formatTextAsInt(
+      settings.initSeed,
+      parseInt(defaultEggTimelineSettings.initSeed, 16),
+      16,
+    ),
+    startFrame: formatTextAsInt(
+      settings.startFrame,
+      defaultEggTimelineSettings.startFrame,
+      10,
+    ),
+    npcCount: formatTextAsInt(
+      settings.npcCount,
+      defaultEggTimelineSettings.npcCount,
+      10,
+    ),
+    tsvs: formatTextAsArray(settings.tsvs, COMMA_WITH_SPACE_REGEX, [], num =>
+      parseInt(num, 10),
+    ),
+    timelineSeconds: formatTextAsInt(
+      settings.timelineSeconds,
+      defaultEggTimelineSettings.timelineSeconds,
+      10,
     ),
   };
 };
 
-const EggTimelineForm = ({ onSubmit = _.noop }) => {
+const EggTimelineForm = () => {
   const classes = useStyles({});
-  const refs = {
-    initSeed: React.useRef(null),
-    startFrame: React.useRef(null),
-    npcCount: React.useRef(null),
-    timelineSeconds: React.useRef(null),
-    tsvs: React.useRef(null),
-  };
+  const { getRefs, getValues } = useForm(
+    defaultEggTimelineSettings,
+    parseSettings,
+  );
+  const refs = getRefs();
+  const { loading, data } = useQuery(GET_EGG_TIMELINE_SETTINGS);
+  const [setEggTimelineSettings] = useMutation(SET_EGG_TIMELINE_SETTINGS);
+
+  if (loading) {
+    return null;
+  }
 
   // These inputs will be mapped over later with a key added
   /* eslint-disable react/jsx-key */
   const inputs = [
     <TextField
-      inputRef={refs.initSeed}
       label="Initial Seed"
-      placeholder="AABBCCDD"
+      placeholder={data.initSeed.toString(16).toUpperCase()}
+      inputRef={refs.initSeed}
     />,
     <TextField
-      inputRef={refs.startFrame}
       label="Start Frame"
-      placeholder="900"
+      type="number"
+      placeholder={data.startFrame.toString(10)}
+      inputRef={refs.startFrame}
     />,
-    <TextField inputRef={refs.npcCount} label="NPC Count" placeholder="4" />,
     <TextField
-      inputRef={refs.timelineSeconds}
+      label="NPC Count"
+      type="number"
+      placeholder={data.npcCount.toString(10)}
+      inputRef={refs.npcCount}
+    />,
+    <TextField
       label="Timeline Seconds"
-      placeholder="120"
+      type="number"
+      placeholder={data.timelineSeconds.toString(10)}
+      inputRef={refs.timelineSeconds}
     />,
     <TextField
-      inputRef={refs.tsvs}
       label="TSV Filter List"
-      placeholder="123, 4567"
+      placeholder={data.tsvs.join(', ')}
+      inputRef={refs.tsvs}
     />,
     <Button
       variant="contained"
       color="primary"
       className={classes.fullWidth}
-      onClick={() => onSubmit(formatRefsAsSettings(refs))}
+      onClick={() => setEggTimelineSettings({ variables: getValues() })}
     >
       Get Egg Timeline
     </Button>,

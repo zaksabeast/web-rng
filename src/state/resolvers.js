@@ -70,6 +70,21 @@ const resolvers = {
 
       return true;
     },
+    setSafeFrameSettings: (parent, args, context) => {
+      context.cache.writeData({ data: args });
+
+      return true;
+    },
+    setEggTimelineSettings: (parent, args, context) => {
+      context.cache.writeData({ data: args });
+
+      return true;
+    },
+    setEggSettings: (parent, args, context) => {
+      context.cache.writeData({ data: args });
+
+      return true;
+    },
   },
 };
 

@@ -3,11 +3,14 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '../components/TextField';
 import makeStyles from '@material-ui/styles/makeStyles';
-import gql from 'graphql-tag';
 import { useMutation, useQuery } from '@apollo/react-hooks';
 import { formatTextAsInt } from '../utils/format-text-as-int';
 import { defaultSafeFrameSettings } from '../state/client';
 import { useForm } from '../utils/use-form';
+import {
+  GET_SAFE_FRAME_SETTINGS,
+  SET_SAFE_FRAME_SETTINGS,
+} from '../state/queries/safe-frame-settings';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -19,31 +22,6 @@ const useStyles = makeStyles({
     maxWidth: 300,
   },
 });
-
-const GET_SAFE_FRAME_SETTINGS = gql`
-  query {
-    initSeed @client
-    startFrame @client
-    endFrame @client
-    npcCount @client
-  }
-`;
-
-const SET_SAFE_FRAME_SETTINGS = gql`
-  mutation(
-    $initSeed: String!
-    $startFrame: Int!
-    $endFrame: Int!
-    $npcCount: Int!
-  ) {
-    setSafeFrameSettings(
-      initSeed: $initSeed
-      startFrame: $startFrame
-      endFrame: $endFrame
-      npcCount: $npcCount
-    ) @client
-  }
-`;
 
 const parseSettings = settings => {
   return {

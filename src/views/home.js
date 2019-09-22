@@ -1,51 +1,13 @@
 import _ from 'lodash';
 import React from 'react';
 import MainLayout from '../layouts/main';
-import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 import EggResults from '../components/EggResults';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import EggForm from '../components/EggForm';
-
-const GET_EGG_SETTINGS = gql`
-  query {
-    eggSettings @client {
-      __typename
-      eggSeeds
-      femaleIVs
-      maleIVs
-      otherTSV
-      masudaMethod
-      isFemaleDitto
-      nidoType
-      sameDexNumber
-      shinyCharm
-      playerTSV
-      femaleAbility
-      femaleItem
-      genderRatio
-      maleAbility
-      maleItem
-      frameAmount
-    }
-    eggFilters @client {
-      __typename
-      gender
-      upperIVs
-      lowerIVs
-      perfectIVs
-      shinies
-      applyFilters
-    }
-  }
-`;
-
-const GET_EGGS = gql`
-  query($settings: Gen7EggSettings, $frameAmount: Int!) {
-    eggs: getGen7Eggs(settings: $settings, frameAmount: $frameAmount) @client
-  }
-`;
+import { GET_EGG_SETTINGS } from '../state/queries/egg-settings';
+import { GET_EGGS } from '../state/queries/get-eggs';
 
 const useStyles = makeStyles({
   loadingText: {

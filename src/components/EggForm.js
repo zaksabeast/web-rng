@@ -12,11 +12,14 @@ import GenderDropdown from '../components/GenderDropdown';
 import { formatTextAsArray } from '../utils/format-text-as-array';
 import { COMMA_WITH_SPACE_REGEX } from '../constants/regex';
 import { formatTextAsInt } from '../utils/format-text-as-int';
-import gql from 'graphql-tag';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import { defaultEggSettingsForm } from '../state/client';
 import { useForm } from '../utils/use-form';
 import { formatIVs } from '../utils/format-ivs';
+import {
+  GET_EGG_SETTINGS,
+  SET_EGG_SETTINGS,
+} from '../state/queries/egg-settings';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -28,45 +31,6 @@ const useStyles = makeStyles({
     maxWidth: 300,
   },
 });
-
-const GET_EGG_SETTINGS = gql`
-  query {
-    eggSettings @client {
-      __typename
-      eggSeeds
-      femaleIVs
-      maleIVs
-      otherTSV
-      masudaMethod
-      isFemaleDitto
-      nidoType
-      sameDexNumber
-      shinyCharm
-      playerTSV
-      femaleAbility
-      femaleItem
-      genderRatio
-      maleAbility
-      maleItem
-      frameAmount
-    }
-    eggFilters @client {
-      __typename
-      gender
-      upperIVs
-      lowerIVs
-      perfectIVs
-      shinies
-      applyFilters
-    }
-  }
-`;
-
-const SET_EGG_SETTINGS = gql`
-  mutation($eggSettings: Gen7EggSettingsInput!, $eggFilters: EggFiltersInput!) {
-    setEggSettings(eggSettings: $eggSettings, eggFilters: $eggFilters) @client
-  }
-`;
 
 const parseSettings = settings => {
   return {

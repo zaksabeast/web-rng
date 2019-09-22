@@ -1,41 +1,14 @@
 import _ from 'lodash';
 import React from 'react';
 import MainLayout from '../layouts/main';
-import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import EggTimelineForm from '../components/EggTimelineForm';
 import EggTimelineResults from '../components/EggTimelineResults';
 import { calculatePSV } from '../utils/calculate-psv';
-
-const GET_EGG_TIMELINE_SETTINGS = gql`
-  query {
-    initSeed @client
-    startFrame @client
-    npcCount @client
-    tsvs @client
-    timelineSeconds @client
-  }
-`;
-
-const GET_TIMELINE = gql`
-  query(
-    $initSeed: Int!
-    $startFrame: Int!
-    $npcCount: Int!
-    $timelineSeconds: Int!
-    $delayFrames: Int!
-  ) {
-    timeline: createTimeline(
-      sfmtSeed: $initSeed
-      startFrame: $startFrame
-      npcNumber: $npcCount
-      seconds: $timelineSeconds
-      delayFrames: $delayFrames
-    ) @client
-  }
-`;
+import { GET_EGG_TIMELINE_SETTINGS } from '../state/queries/egg-timeline-settings';
+import { GET_TIMELINE } from '../state/queries/get-timeline';
 
 const useStyles = makeStyles({
   loadingText: {

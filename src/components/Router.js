@@ -1,21 +1,12 @@
 import React from 'react';
-import gql from 'graphql-tag';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import HomeView from '../views/home';
 import TimelineView from '../views/timeline';
 import SafeFrameView from '../views/safe-frame';
-
-const GET_CURRENT_VIEW = gql`
-  query {
-    currentView @client
-  }
-`;
-
-const SET_CURRENT_VIEW = gql`
-  mutation($view: String!) {
-    setCurrentView(view: $view) @client
-  }
-`;
+import {
+  GET_CURRENT_VIEW,
+  SET_CURRENT_VIEW,
+} from '../state/queries/current-view';
 
 const getViewComponent = viewName => {
   switch (viewName) {

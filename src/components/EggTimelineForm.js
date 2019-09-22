@@ -7,9 +7,12 @@ import { formatTextAsArray } from '../utils/format-text-as-array';
 import { COMMA_WITH_SPACE_REGEX } from '../constants/regex';
 import { formatTextAsInt } from '../utils/format-text-as-int';
 import { useMutation, useQuery } from '@apollo/react-hooks';
-import gql from 'graphql-tag';
 import { useForm } from '../utils/use-form';
 import { defaultEggTimelineSettings } from '../state/client';
+import {
+  GET_EGG_TIMELINE_SETTINGS,
+  SET_EGG_TIMELINE_SETTINGS,
+} from '../state/queries/egg-timeline-settings';
 
 const useStyles = makeStyles({
   fullWidth: {
@@ -21,34 +24,6 @@ const useStyles = makeStyles({
     maxWidth: 300,
   },
 });
-
-const GET_EGG_TIMELINE_SETTINGS = gql`
-  query {
-    initSeed @client
-    startFrame @client
-    npcCount @client
-    tsvs @client
-    timelineSeconds @client
-  }
-`;
-
-const SET_EGG_TIMELINE_SETTINGS = gql`
-  mutation(
-    $initSeed: Int!
-    $startFrame: Int!
-    $npcCount: Int!
-    $tsvs: [Int!]!
-    $timelineSeconds: Int!
-  ) {
-    setSafeFrameSettings(
-      initSeed: $initSeed
-      startFrame: $startFrame
-      npcCount: $npcCount
-      tsvs: $tsvs
-      timelineSeconds: $timelineSeconds
-    ) @client
-  }
-`;
 
 const parseSettings = settings => {
   return {

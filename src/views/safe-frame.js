@@ -1,31 +1,12 @@
 import React from 'react';
 import MainLayout from '../layouts/main';
-import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import SafeFrameForm from '../components/SafeFrameForm';
 import SafeFrameResults from '../components/SafeFrameResults';
-
-const GET_SAFE_FRAME_SETTINGS = gql`
-  query {
-    initSeed @client
-    startFrame @client
-    endFrame @client
-    npcCount @client
-  }
-`;
-
-const GET_SAFE_FRAMES = gql`
-  query($initSeed: Int!, $startFrame: Int!, $endFrame: Int!, $npcCount: Int!) {
-    safeFrames: getSafeFrames(
-      sfmtSeed: $initSeed
-      maxFrame: $endFrame
-      minFrame: $startFrame
-      npcNumber: $npcCount
-    ) @client
-  }
-`;
+import { GET_SAFE_FRAME_SETTINGS } from '../state/queries/safe-frame-settings';
+import { GET_SAFE_FRAMES } from '../state/queries/get-safe-frames';
 
 const useStyles = makeStyles({
   loadingText: {

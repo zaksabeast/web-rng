@@ -103,8 +103,7 @@ const EggForm = () => {
   const inputs = [
     <TextField
       label="Egg Seeds"
-      placeholder={data.eggSettings.eggSeeds
-        .map(seed => seed.toString(16))
+      placeholder={_.map(data.eggSettings.eggSeeds, seed => seed.toString(16))
         .join(', ')
         .toUpperCase()}
       inputRef={refs.eggSettings.eggSeeds}

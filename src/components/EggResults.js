@@ -56,12 +56,10 @@ const formatEggRow = eggResult => {
   return [
     frame,
     frameAdvance,
-    eggSeeds
-      .map(seed => seed.toString(16).toUpperCase())
+    _.map(eggSeeds, seed => seed.toString(16).toUpperCase())
       .reverse()
       .join(', '),
-    originalEggSeeds
-      .map(seed => seed.toString(16).toUpperCase())
+    _.map(originalEggSeeds, seed => seed.toString(16).toUpperCase())
       .reverse()
       .join(', '),
     egg.ivs.join('/'),
